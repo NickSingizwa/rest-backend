@@ -282,64 +282,92 @@ exports.updateVehicle = async (req, res) => {
         //         message: "Vehicle already exists"
         //     });
         // }
+
         //upload image to cloudinary
-        if (!req.files)
-            return res.status(400).json({
-                success: false,
-                message: "Please upload a photo",
+        if (!req.files){
+            vehicle = await Vehicle.findByIdAndUpdate(
+                req.params.id,
+                {
+                  vehiclePlateNumber,
+                  manufactureCompany,
+                  manufactureYear,
+                  price,
+                  chasisNumber,
+                  modelName,
+                  owner,
+                },
+                {
+                  new: true,
+                  useFindAndModify: false,
+                }
+              );
+              res.status(200).json({
+                success: true,
+                status: 200,
+                message: "Vehicle updated successfully",
+                data: {
+                    vehicle
+                }
             });
-        const file = req.files.photo;
-        //make sure that uploaded file is an image
-        if (!file.mimetype.startsWith("image"))
-            return res.status(400).json({
-                success: false,
-                message: "please upload an image file",
-            });
-        //checking photo size
-        if (file.size > process.env.MAX_FILE_SIZE)
-            return res.status(400).json({
-                success: false,
-                message: `please upload an image less than ${process.env.MAX_FILE_SIZE}`,
-            });
-        //customizing image name to avoid overwriting
-        file.name = `photo}${
-          path.parse(file.name).ext
-        }`;
-        //checking if project has cloudinar id
-        cloudinary.uploader
-            .upload(file.tempFilePath)
-            .then(async (result) => {
-                //updating vehicle
-                vehicle = await Vehicle.findByIdAndUpdate(req.params.id, {
-                    vehiclePlateNumber,
-                    manufactureCompany,
-                    manufactureYear,
-                    price,
-                    chasisNumber,
-                    modelName,
-                    owner,
-                    photo: result.secure_url,
-                    cloudinary_id: result.public_id,
-                }, {
-                    new: true,
-                    useFindAndModify: false,
-                });
-                res.status(200).json({
-                    success: true,
-                    status: 200,
-                    message: "Vehicle updated successfully",
-                    data: {
-                        vehicle
-                    }
-                });
-            })
-            .catch((err) => {
-                console.log(err);
-                res.status(500).json({
+              // return res.status(400).json({
+              //     success: false,
+              //     message: "Please upload a photo",
+              // });
+        }else{
+
+            const file = req.files.photo;
+            //make sure that uploaded file is an image
+            if (!file.mimetype.startsWith("image"))
+                return res.status(400).json({
                     success: false,
-                    message: "Internal server error",
+                    message: "please upload an image file",
                 });
-            });
+            //checking photo size
+            if (file.size > process.env.MAX_FILE_SIZE)
+                return res.status(400).json({
+                    success: false,
+                    message: `please upload an image less than ${process.env.MAX_FILE_SIZE}`,
+                });
+            //customizing image name to avoid overwriting
+            file.name = `photo}${
+              path.parse(file.name).ext
+            }`;
+            //checking if project has cloudinar id
+            cloudinary.uploader
+                .upload(file.tempFilePath)
+                .then(async (result) => {
+                    //updating vehicle
+                    vehicle = await Vehicle.findByIdAndUpdate(req.params.id, {
+                        vehiclePlateNumber,
+                        manufactureCompany,
+                        manufactureYear,
+                        price,
+                        chasisNumber,
+                        modelName,
+                        owner,
+                        photo: result.secure_url,
+                        cloudinary_id: result.public_id,
+                    }, {
+                        new: true,
+                        useFindAndModify: false,
+                    });
+                    res.status(200).json({
+                        success: true,
+                        status: 200,
+                        message: "Vehicle updated successfully",
+                        data: {
+                            vehicle
+                        }
+                    });
+                })
+                .catch((err) => {
+                    console.log(err);
+                    res.status(500).json({
+                        success: false,
+                        message: "Internal server error",
+                    });
+                });
+        }
     } catch (error) {
         console.log(error);
         res.status(500).json({

@@ -214,7 +214,7 @@ exports.deleteVehicle = async (req, res) => {
         //delete vehicle from cloudinary
         await cloudinary.uploader.destroy(vehicle.cloudinary_id);
         //delete vehicle from db
-        await vehicle.remove();
+        await vehicle.deleteOne({_id:req.params.id});
         res.status(200).json({
             success: true,
             status: 200,
@@ -272,16 +272,16 @@ exports.updateVehicle = async (req, res) => {
             });
         }
         //check if vehicle already exists
-        let vehiclePlate = await Vehicle.findOne({
-            vehiclePlateNumber: req.body.vehiclePlateNumber
-        });
-        if (vehiclePlate) {
-            return res.status(400).json({
-                success: false,
-                status: 400,
-                message: "Vehicle already exists"
-            });
-        }
+        // let vehiclePlate = await Vehicle.findOne({
+        //     vehiclePlateNumber: req.body.vehiclePlateNumber
+        // });
+        // if (vehiclePlate) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         status: 400,
+        //         message: "Vehicle already exists"
+        //     });
+        // }
         //upload image to cloudinary
         if (!req.files)
             return res.status(400).json({
@@ -322,6 +322,7 @@ exports.updateVehicle = async (req, res) => {
                     cloudinary_id: result.public_id,
                 }, {
                     new: true,
+                    useFindAndModify: false,
                 });
                 res.status(200).json({
                     success: true,

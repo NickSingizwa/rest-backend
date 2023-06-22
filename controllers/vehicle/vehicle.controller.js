@@ -309,12 +309,7 @@ exports.updateVehicle = async (req, res) => {
                     vehicle
                 }
             });
-              // return res.status(400).json({
-              //     success: false,
-              //     message: "Please upload a photo",
-              // });
         }else{
-
             const file = req.files.photo;
             //make sure that uploaded file is an image
             if (!file.mimetype.startsWith("image"))
